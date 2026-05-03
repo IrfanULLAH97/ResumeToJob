@@ -1,4 +1,4 @@
-"""Helpers for extracting resume skills and future job matching."""
+"""Helpers for extracting resume skills and matching them to jobs."""
 
 import re
 
@@ -77,25 +77,79 @@ def extract_skills(text: str) -> list:
     return matched_skills
 
 
-def calculate_match_score(resume_skills, job_description):
+def _unique_skills(skills: list) -> list:
+    """Remove duplicates while preserving the original skill names and order."""
+    unique_items = []
+    seen_skills = set()
+
+    for skill in skills or []:
+        if not isinstance(skill, str):
+            continue
+
+        normalized_skill = skill.strip().lower()
+        if not normalized_skill or normalized_skill in seen_skills:
+            continue
+
+        seen_skills.add(normalized_skill)
+        unique_items.append(skill.strip())
+
+    return unique_items
+
+
+def _get_match_label(match_score: int) -> str:
+    """Return a human-friendly label for a job match score."""
+    if match_score >= 90:
+        return "Excellent Match"
+    if match_score >= 70:
+        return "Good Match"
+    if match_score >= 50:
+        return "Moderate Match"
+    return "Needs Improvement"
+
+
+def match_resume_to_jobs(resume_skills: list, jobs: list) -> list:
     """
-    Compare detected resume skills with a job description.
+    Match resume skills against a list of jobs.
 
     Returns:
-        tuple: (score, matched_skills, missing_skills)
+        list: Sorted job match dictionaries from highest score to lowest.
     """
-    if not job_description:
-        return 0, [], []
+    normalized_resume_skills = {
+        skill.lower(): skill for skill in _unique_skills(resume_skills)
+    }
 
-    job_text = job_description.lower()
-    required_skills = [
-        skill for skill in SKILL_LIST if re.search(_build_skill_pattern(skill), job_text)
-    ]
-    matched_skills = [skill for skill in resume_skills if skill in required_skills]
-    missing_skills = [skill for skill in required_skills if skill not in resume_skills]
+    job_matches = []
 
-    if not required_skills:
-        return 0, matched_skills, missing_skills
+    for job in jobs or []:
+        required_skills = _unique_skills(job.get("required_skills", []))
+        matched_skills = []
+        missing_skills = []
 
-    score = int((len(matched_skills) / len(required_skills)) * 100)
-    return score, matched_skills, missing_skills
+        for required_skill in required_skills:
+            if required_skill.lower() in normalized_resume_skills:
+                matched_skills.append(required_skill)
+            else:
+                missing_skills.append(required_skill)
+
+        if required_skills:
+            match_score = round((len(matched_skills) / len(required_skills)) * 100)
+        else:
+            match_score = 0
+
+        job_matches.append(
+            {
+                "id": job.get("id"),
+                "title": job.get("title", "Untitled Role"),
+                "company": job.get("company", "Unknown Company"),
+                "location": job.get("location", "Not specified"),
+                "category": job.get("category", "General"),
+                "description": job.get("description", ""),
+                "required_skills": required_skills,
+                "matched_skills": matched_skills,
+                "missing_skills": missing_skills,
+                "match_score": match_score,
+                "match_label": _get_match_label(match_score),
+            }
+        )
+
+    return sorted(job_matches, key=lambda job: job["match_score"], reverse=True)
