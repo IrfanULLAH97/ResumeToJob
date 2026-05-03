@@ -1,6 +1,8 @@
 """Optional public job API integration for CareerPilot AI."""
 
+import html
 import json
+import re
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -15,13 +17,20 @@ REQUEST_HEADERS = {
 }
 
 
-def fetch_remote_jobs(keyword="data", location="remote") -> list:
+def fetch_remote_jobs(keyword="data", location="remote", visa_sponsorship=False) -> list:
     """
     Fetch public remote jobs from a no-auth API source.
 
     Returns:
         list: Normalized job dictionaries. Returns an empty list if all APIs fail.
     """
+    if visa_sponsorship:
+        return _fetch_arbeitnow_jobs(
+            keyword=keyword,
+            location=location,
+            visa_sponsorship=visa_sponsorship,
+        )
+
     remotive_jobs = _fetch_remotive_jobs(keyword=keyword, location=location)
     if remotive_jobs:
         return remotive_jobs
@@ -61,6 +70,7 @@ def _fetch_remotive_jobs(keyword="data", location="remote") -> list:
                     "id": f"remote-{job.get('id', len(remote_jobs) + 1)}",
                     "title": job.get("title", "Remote Role"),
                     "company": job.get("company_name", "Unknown Company"),
+                    "url": job.get("url", ""),
                     "location": location if location else job.get("candidate_required_location", "Remote"),
                     "category": job.get("category", "Remote Jobs"),
                     "required_skills": extract_skills(combined_text),
@@ -73,11 +83,13 @@ def _fetch_remotive_jobs(keyword="data", location="remote") -> list:
         return []
 
 
-def _fetch_arbeitnow_jobs(keyword="data", location="remote") -> list:
+def _fetch_arbeitnow_jobs(keyword="data", location="remote", visa_sponsorship=False) -> list:
     """Fetch jobs from Arbeitnow and normalize them."""
     query_params = {
         "search": keyword,
     }
+    if visa_sponsorship:
+        query_params["visa_sponsorship"] = "true"
 
     try:
         request_url = f"{ARBEITNOW_API_URL}?{urlencode(query_params)}"
@@ -104,6 +116,7 @@ def _fetch_arbeitnow_jobs(keyword="data", location="remote") -> list:
                     "id": f"arbeitnow-{job.get('slug', len(remote_jobs) + 1)}",
                     "title": job.get("title", "Remote Role"),
                     "company": job.get("company_name", "Unknown Company"),
+                    "url": job.get("url", ""),
                     "location": job.get("location", location or "Remote"),
                     "category": "Remote Jobs",
                     "required_skills": extract_skills(combined_text),
@@ -117,11 +130,13 @@ def _fetch_arbeitnow_jobs(keyword="data", location="remote") -> list:
 
 
 def _clean_description(description: str) -> str:
-    """Convert a long HTML-like description into a short readable summary."""
+    """Convert a long HTML description into short readable plain text."""
     if not description:
         return "Remote job imported from a public API."
 
-    plain_text = description.replace("<br>", " ").replace("<br/>", " ").replace("<br />", " ")
+    plain_text = html.unescape(description)
+    plain_text = re.sub(r"<br\s*/?>", " ", plain_text, flags=re.IGNORECASE)
+    plain_text = re.sub(r"<[^>]+>", " ", plain_text)
     plain_text = " ".join(plain_text.split())
 
     return plain_text[:280] + "..." if len(plain_text) > 280 else plain_text

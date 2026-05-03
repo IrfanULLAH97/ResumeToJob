@@ -141,6 +141,7 @@ def match_resume_to_jobs(resume_skills: list, jobs: list) -> list:
                 "id": job.get("id"),
                 "title": job.get("title", "Untitled Role"),
                 "company": job.get("company", "Unknown Company"),
+                "url": job.get("url", ""),
                 "location": job.get("location", "Not specified"),
                 "category": job.get("category", "General"),
                 "description": job.get("description", ""),

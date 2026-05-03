@@ -102,6 +102,11 @@ with left_column:
     st.markdown("### Upload or Paste Your Resume")
     uploaded_file = st.file_uploader("Upload a PDF resume", type=["pdf"])
     use_public_jobs = st.checkbox("Try fetching public jobs online")
+    use_visa_sponsorship = st.checkbox(
+        "Only show public jobs with visa sponsorship",
+        disabled=not use_public_jobs,
+        help="This filter is applied when public jobs are fetched from Arbeitnow.",
+    )
 
 with right_column:
     st.markdown("### Analysis Summary")
@@ -170,12 +175,20 @@ if analyze_resume:
             jobs = load_jobs()
 
             if use_public_jobs:
-                remote_jobs = fetch_remote_jobs()
+                remote_jobs = fetch_remote_jobs(
+                    visa_sponsorship=use_visa_sponsorship,
+                )
                 if remote_jobs:
                     jobs.extend(remote_jobs)
-                    st.session_state.jobs_status_message = (
-                        f"Loaded {len(remote_jobs)} public remote jobs in addition to local sample jobs."
-                    )
+                    if use_visa_sponsorship:
+                        st.session_state.jobs_status_message = (
+                            f"Loaded {len(remote_jobs)} public jobs with visa sponsorship "
+                            "in addition to local sample jobs."
+                        )
+                    else:
+                        st.session_state.jobs_status_message = (
+                            f"Loaded {len(remote_jobs)} public remote jobs in addition to local sample jobs."
+                        )
                 else:
                     st.session_state.jobs_status_message = "Using local sample jobs for demo."
 
@@ -225,6 +238,8 @@ if st.session_state.analysis_ready and st.session_state.job_matches:
                 st.markdown(f"**Location:** {job['location']}")
                 st.markdown(f"**Category:** {job['category']}")
                 st.markdown(f"**Job Description:** {job['description']}")
+                if job.get("url"):
+                    st.markdown(f"[Apply]({job['url']})")
 
             with score_col:
                 st.markdown(f"### {job['match_score']}%")
