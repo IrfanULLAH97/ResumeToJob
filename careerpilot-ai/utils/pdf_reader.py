@@ -151,6 +151,8 @@ def _find_tesseract_path():
         return path_from_env
 
     common_paths = [
+        "/usr/bin/tesseract",
+        "/usr/local/bin/tesseract",
         os.path.join(
             os.environ.get("LOCALAPPDATA", ""),
             "Programs",
