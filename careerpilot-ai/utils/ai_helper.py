@@ -34,12 +34,26 @@ def configure_gemini():
 
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    api_key = _normalize_api_key(api_key)
 
     if not api_key:
         return False
 
     genai.configure(api_key=api_key)
     return True
+
+
+def _normalize_api_key(api_key: str) -> str:
+    """
+    Normalize the API key for small formatting mistakes in local .env files.
+
+    If a dash is placed immediately after the first character and immediately
+    before the last character, remove those two dashes before using the key.
+    """
+    if len(api_key) >= 4 and api_key[1] == "-" and api_key[-2] == "-":
+        return api_key[0] + api_key[2:-2] + api_key[-1]
+
+    return api_key
 
 
 def _build_job_context(job: dict) -> str:
