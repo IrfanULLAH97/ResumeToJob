@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Frontend Developer",
+    "company": "SampleTech",
+    "description": "Looking for a frontend developer with HTML, CSS, JavaScript, React, Git, and teamwork skills."
+  },
+  {
+    "title": "Python Developer",
+    "company": "CodeWorks",
+    "description": "Seeking a Python developer familiar with APIs, data structures, debugging, Git, and problem-solving."
+  },
+  {
+    "title": "Data Analyst",
+    "company": "Insight Labs",
+    "description": "Need a data analyst with Excel, SQL, Python, data visualization, communication, and analytical thinking."
+  }
+]

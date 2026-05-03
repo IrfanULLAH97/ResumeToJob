@@ -1,0 +1,46 @@
+- generic [ref=e3]:
+  - banner
+  - generic [ref=e6]:
+    - heading "CareerPilot AI" [level=1] [ref=e11]:
+      - text: CareerPilot AI
+      - generic [ref=e12]:
+        - link "Link to heading":
+          - /url: "#career-pilot-ai"
+          - img
+    - heading "Resume-to-Job Match & Application Assistant" [level=3] [ref=e17]:
+      - text: Resume-to-Job Match & Application Assistant
+      - generic [ref=e18]:
+        - link "Link to heading":
+          - /url: "#resume-to-job-match-and-application-assistant"
+          - img
+    - paragraph [ref=e23]: CareerPilot AI is a beginner-friendly Streamlit project that helps users upload a resume, compare it with job descriptions, and later receive AI-powered feedback for improving applications.
+    - heading "Upload Your Resume" [level=3] [ref=e29]:
+      - text: Upload Your Resume
+      - generic [ref=e30]:
+        - link "Link to heading":
+          - /url: "#upload-your-resume"
+          - img
+    - generic [ref=e32]:
+      - paragraph [ref=e36]: Upload a PDF resume
+      - region "Upload a PDF resume" [ref=e37] [cursor=pointer]:
+        - button "Choose File" [ref=e38]
+        - button "upload Upload" [ref=e40]:
+          - generic [ref=e42]:
+            - generic [ref=e44]: upload
+            - paragraph [ref=e46]: Upload
+        - generic [ref=e49]: 200MB per file • PDF
+    - heading "Or Paste Resume Text" [level=3] [ref=e55]:
+      - text: Or Paste Resume Text
+      - generic [ref=e56]:
+        - link "Link to heading":
+          - /url: "#or-paste-resume-text"
+          - img
+    - generic [ref=e58]:
+      - paragraph [ref=e62]: Paste your resume content here
+      - textbox "Paste your resume content here" [ref=e65]:
+        - /placeholder: Copy and paste your resume text here...
+        - text: Python developer with Git, APIs, and teamwork experience.
+    - button "Analyze Resume" [active] [ref=e68] [cursor=pointer]:
+      - paragraph [ref=e72]: Analyze Resume
+    - alert [ref=e76]:
+      - paragraph [ref=e81]: Resume analysis will appear here.
