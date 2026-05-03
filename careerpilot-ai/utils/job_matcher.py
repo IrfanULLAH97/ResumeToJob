@@ -1,32 +1,79 @@
-"""Helpers for simple resume-to-job matching."""
+"""Helpers for extracting resume skills and future job matching."""
+
+import re
 
 
-def detect_skills(resume_text):
+SKILL_LIST = [
+    "Python",
+    "SQL",
+    "Excel",
+    "Power BI",
+    "Tableau",
+    "Machine Learning",
+    "Deep Learning",
+    "Artificial Intelligence",
+    "NLP",
+    "Data Analysis",
+    "Data Visualization",
+    "Pandas",
+    "NumPy",
+    "Scikit-learn",
+    "TensorFlow",
+    "PyTorch",
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "React",
+    "Node.js",
+    "Flask",
+    "FastAPI",
+    "Django",
+    "Git",
+    "GitHub",
+    "APIs",
+    "Linux",
+    "Docker",
+    "AWS",
+    "Azure",
+    "Google Cloud",
+    "Cybersecurity",
+    "Network Security",
+    "SCADA",
+    "PLC",
+    "DCS",
+    "OT Security",
+    "Problem Solving",
+    "Communication",
+    "Teamwork",
+    "Leadership",
+]
+
+
+def _build_skill_pattern(skill: str) -> str:
+    """Build a safe case-insensitive regex pattern for a skill."""
+    skill_pattern = re.escape(skill.lower()).replace(r"\ ", r"\s+")
+    return rf"(?<!\w){skill_pattern}(?!\w)"
+
+
+def extract_skills(text: str) -> list:
     """
-    Detect basic skills from resume text using a small keyword list.
+    Extract skills from resume text using a predefined skill list.
 
-    This is a placeholder implementation designed to be easy to understand.
+    Matching is case-insensitive and avoids duplicate results.
     """
-    if not resume_text:
+    if not text:
         return []
 
-    known_skills = [
-        "python",
-        "javascript",
-        "react",
-        "html",
-        "css",
-        "sql",
-        "git",
-        "excel",
-        "apis",
-        "debugging",
-        "communication",
-        "teamwork",
-    ]
+    matched_skills = []
 
-    text_lower = resume_text.lower()
-    matched_skills = [skill for skill in known_skills if skill in text_lower]
+    for skill in SKILL_LIST:
+        # Allow flexible spacing for multi-word skills while keeping matching safe
+        # for short skills such as SQL, CSS, and AWS.
+        pattern = _build_skill_pattern(skill)
+
+        if re.search(pattern, text.lower()):
+            matched_skills.append(skill)
+
     return matched_skills
 
 
@@ -41,22 +88,9 @@ def calculate_match_score(resume_skills, job_description):
         return 0, [], []
 
     job_text = job_description.lower()
-    job_keywords = [
-        "python",
-        "javascript",
-        "react",
-        "html",
-        "css",
-        "sql",
-        "git",
-        "excel",
-        "apis",
-        "debugging",
-        "communication",
-        "teamwork",
+    required_skills = [
+        skill for skill in SKILL_LIST if re.search(_build_skill_pattern(skill), job_text)
     ]
-
-    required_skills = [skill for skill in job_keywords if skill in job_text]
     matched_skills = [skill for skill in resume_skills if skill in required_skills]
     missing_skills = [skill for skill in required_skills if skill not in resume_skills]
 

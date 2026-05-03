@@ -1,17 +1,137 @@
 [
   {
-    "title": "Frontend Developer",
-    "company": "SampleTech",
-    "description": "Looking for a frontend developer with HTML, CSS, JavaScript, React, Git, and teamwork skills."
+    "id": 1,
+    "title": "Data Analyst Intern",
+    "company": "InsightBridge Analytics",
+    "location": "Lahore, Pakistan",
+    "category": "Data Science",
+    "required_skills": ["SQL", "Excel", "Python", "Data Analysis", "Communication"],
+    "description": "Support dashboard reporting, clean business data, and assist senior analysts with weekly performance insights."
   },
   {
-    "title": "Python Developer",
-    "company": "CodeWorks",
-    "description": "Seeking a Python developer familiar with APIs, data structures, debugging, Git, and problem-solving."
+    "id": 2,
+    "title": "Junior Machine Learning Engineer",
+    "company": "VisionNova Labs",
+    "location": "Karachi, Pakistan",
+    "category": "Machine Learning",
+    "required_skills": ["Python", "Machine Learning", "Pandas", "NumPy", "Scikit-learn", "Git"],
+    "description": "Help build and test predictive models, prepare datasets, and support model evaluation for internal AI products."
   },
   {
-    "title": "Data Analyst",
-    "company": "Insight Labs",
-    "description": "Need a data analyst with Excel, SQL, Python, data visualization, communication, and analytical thinking."
+    "id": 3,
+    "title": "AI Application Developer",
+    "company": "SmartFlow Technologies",
+    "location": "Islamabad, Pakistan",
+    "category": "Artificial Intelligence",
+    "required_skills": ["Python", "Artificial Intelligence", "FastAPI", "APIs", "GitHub", "Problem Solving"],
+    "description": "Develop simple AI-powered application features, integrate APIs, and assist with prototype deployment."
+  },
+  {
+    "id": 4,
+    "title": "Python Backend Developer",
+    "company": "CodeHarbor Systems",
+    "location": "Remote",
+    "category": "Software Engineering",
+    "required_skills": ["Python", "Flask", "FastAPI", "SQL", "APIs", "Git"],
+    "description": "Build backend endpoints, connect services to databases, and help maintain clean and testable application logic."
+  },
+  {
+    "id": 5,
+    "title": "Cybersecurity Analyst Intern",
+    "company": "SecureAxis",
+    "location": "Karachi, Pakistan",
+    "category": "Cybersecurity",
+    "required_skills": ["Cybersecurity", "Network Security", "Linux", "Communication", "Teamwork"],
+    "description": "Assist with log review, vulnerability tracking, and basic incident response documentation for security operations."
+  },
+  {
+    "id": 6,
+    "title": "OT Cybersecurity Research Assistant",
+    "company": "Indus Critical Systems Lab",
+    "location": "Lahore, Pakistan",
+    "category": "Industrial AI / OT Cybersecurity",
+    "required_skills": ["Cybersecurity", "OT Security", "SCADA", "PLC", "DCS", "Problem Solving", "Communication"],
+    "description": "Support research on industrial control system security, document OT risks, and help review lab test findings."
+  },
+  {
+    "id": 7,
+    "title": "Junior Web Developer",
+    "company": "PixelForge Studio",
+    "location": "Remote",
+    "category": "Web Development",
+    "required_skills": ["HTML", "CSS", "JavaScript", "React", "GitHub", "Teamwork"],
+    "description": "Create responsive UI pages, fix small frontend issues, and collaborate with designers on web features."
+  },
+  {
+    "id": 8,
+    "title": "Cloud Support Intern",
+    "company": "SkyOps Cloud Services",
+    "location": "Islamabad, Pakistan",
+    "category": "Cloud Computing",
+    "required_skills": ["AWS", "Azure", "Google Cloud", "Linux", "Problem Solving", "Communication"],
+    "description": "Help monitor cloud resources, assist with support tickets, and document common infrastructure issues."
+  },
+  {
+    "id": 9,
+    "title": "Business Intelligence Analyst",
+    "company": "MetricPulse",
+    "location": "Karachi, Pakistan",
+    "category": "Business Analysis",
+    "required_skills": ["Power BI", "SQL", "Excel", "Data Visualization", "Communication", "Leadership"],
+    "description": "Develop reports for business teams, track KPIs, and turn operational data into simple management insights."
+  },
+  {
+    "id": 10,
+    "title": "Prompt Engineer Intern",
+    "company": "GenAssist AI",
+    "location": "Remote",
+    "category": "Prompt Engineering",
+    "required_skills": ["Artificial Intelligence", "NLP", "Python", "Communication", "Problem Solving"],
+    "description": "Design and test prompts for AI workflows, review output quality, and support prompt documentation."
+  },
+  {
+    "id": 11,
+    "title": "Data Science Intern",
+    "company": "Predictive Minds",
+    "location": "Lahore, Pakistan",
+    "category": "Data Science",
+    "required_skills": ["Python", "Pandas", "NumPy", "Data Analysis", "Machine Learning", "Teamwork"],
+    "description": "Prepare datasets, explore trends, and assist the data science team with experiments and reporting."
+  },
+  {
+    "id": 12,
+    "title": "Software Engineer Trainee",
+    "company": "NextStack Solutions",
+    "location": "Islamabad, Pakistan",
+    "category": "Software Engineering",
+    "required_skills": ["Python", "Git", "GitHub", "APIs", "Problem Solving", "Teamwork"],
+    "description": "Work on small product tasks, debug code with mentors, and learn software engineering best practices."
+  },
+  {
+    "id": 13,
+    "title": "NLP Engineer Intern",
+    "company": "LinguaCore AI",
+    "location": "Remote",
+    "category": "Artificial Intelligence",
+    "required_skills": ["Python", "NLP", "Machine Learning", "Deep Learning", "PyTorch", "Git"],
+    "description": "Support text processing pipelines, experiment with language models, and evaluate NLP outputs."
+  },
+  {
+    "id": 14,
+    "title": "Industrial AI Intern",
+    "company": "FactorySense Technologies",
+    "location": "Faisalabad, Pakistan",
+    "category": "Industrial AI / OT Cybersecurity",
+    "required_skills": ["Python", "Artificial Intelligence", "Machine Learning", "SCADA", "Data Analysis", "Communication"],
+    "description": "Assist with industrial sensor data analysis and help build early AI use cases for plant operations."
+  },
+  {
+    "id": 15,
+    "title": "Junior Automation Data Analyst",
+    "company": "ProcessIntel Automation",
+    "location": "Lahore, Pakistan",
+    "category": "Industrial AI / OT Cybersecurity",
+    "required_skills": ["Excel", "SQL", "Python", "PLC", "Data Visualization", "Problem Solving"],
+    "description": "Analyze automation data, prepare plant performance reports, and support process improvement reviews."
   }
 ]
