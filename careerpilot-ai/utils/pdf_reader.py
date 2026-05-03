@@ -73,8 +73,6 @@ def _extract_text_with_ocr(pdf_bytes):
     if tesseract_path:
         pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
-    extracted_pages = []
-
     try:
         ocr_text = _extract_text_with_ocr_from_pdfium(pdfium.PdfDocument(pdf_bytes))
         if ocr_text:

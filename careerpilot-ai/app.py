@@ -19,14 +19,19 @@ st.set_page_config(
 
 
 def load_jobs():
-    """Load sample jobs from the local jobs.json file."""
+    """Load sample jobs and return both data and any warning message."""
     jobs_file = Path(__file__).parent / "jobs.json"
 
     try:
         with jobs_file.open("r", encoding="utf-8") as file:
-            return json.load(file)
+            jobs = json.load(file)
+
+        if isinstance(jobs, list):
+            return jobs, ""
+
+        return [], "jobs.json is not in the expected list format."
     except (FileNotFoundError, json.JSONDecodeError):
-        return []
+        return [], "Local jobs.json could not be loaded. Only public jobs will be available."
 
 
 def render_skill_badges(skills):
@@ -37,22 +42,37 @@ def render_skill_badges(skills):
     return " ".join([f"`{skill}`" for skill in skills])
 
 
-if "analysis_ready" not in st.session_state:
+def initialize_session_state():
+    """Create the session state keys used across Streamlit reruns."""
+    defaults = {
+        "analysis_ready": False,
+        "detected_skills": [],
+        "job_matches": [],
+        "analyzed_resume_text": "",
+        "resume_source": "",
+        "ai_resume_feedback": "",
+        "ai_cover_letter": "",
+        "jobs_status_message": "",
+    }
+
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+
+def reset_analysis_state():
+    """Clear analysis and AI results when input is invalid or reset is needed."""
     st.session_state.analysis_ready = False
-if "detected_skills" not in st.session_state:
     st.session_state.detected_skills = []
-if "job_matches" not in st.session_state:
     st.session_state.job_matches = []
-if "analyzed_resume_text" not in st.session_state:
     st.session_state.analyzed_resume_text = ""
-if "resume_source" not in st.session_state:
     st.session_state.resume_source = ""
-if "ai_resume_feedback" not in st.session_state:
     st.session_state.ai_resume_feedback = ""
-if "ai_cover_letter" not in st.session_state:
     st.session_state.ai_cover_letter = ""
-if "jobs_status_message" not in st.session_state:
     st.session_state.jobs_status_message = ""
+
+
+initialize_session_state()
 
 
 with st.sidebar:
@@ -142,7 +162,6 @@ with left_column:
     )
 
 resume_text = extracted_resume_text if extracted_resume_text else manual_resume_text
-
 analyze_resume = st.button("Analyze Resume", use_container_width=True)
 
 st.markdown("## Analysis Results")
@@ -152,14 +171,10 @@ if analyze_resume:
         if uploaded_file is not None and pdf_error_message:
             st.warning(pdf_error_message)
         else:
-            st.warning("Please upload a resume PDF or paste your resume text to begin the analysis.")
-        st.session_state.analysis_ready = False
-        st.session_state.detected_skills = []
-        st.session_state.job_matches = []
-        st.session_state.analyzed_resume_text = ""
-        st.session_state.resume_source = ""
-        st.session_state.ai_resume_feedback = ""
-        st.session_state.ai_cover_letter = ""
+            st.warning(
+                "Please upload a resume PDF or paste your resume text to begin the analysis."
+            )
+        reset_analysis_state()
     else:
         detected_skills = extract_skills(resume_text)
         st.session_state.analyzed_resume_text = resume_text
@@ -172,7 +187,7 @@ if analyze_resume:
 
         if detected_skills:
             st.session_state.detected_skills = detected_skills
-            jobs = load_jobs()
+            jobs, jobs_error_message = load_jobs()
 
             if use_public_jobs:
                 remote_jobs = fetch_remote_jobs(
@@ -191,14 +206,18 @@ if analyze_resume:
                         )
                 else:
                     st.session_state.jobs_status_message = "Using local sample jobs for demo."
+            elif jobs_error_message:
+                st.session_state.jobs_status_message = jobs_error_message
 
             st.session_state.job_matches = match_resume_to_jobs(detected_skills, jobs)
-            st.session_state.analysis_ready = True
+            st.session_state.analysis_ready = bool(st.session_state.job_matches)
+
+            if not st.session_state.job_matches:
+                st.warning(
+                    "No job matches are available right now. Please check jobs.json or try public jobs."
+                )
         else:
-            st.session_state.detected_skills = []
-            st.session_state.job_matches = []
-            st.session_state.analysis_ready = False
-            st.session_state.jobs_status_message = ""
+            reset_analysis_state()
             st.warning(
                 "No skills were detected. Please paste a more detailed resume with tools, "
                 "technologies, coursework, or project experience."
@@ -239,7 +258,7 @@ if st.session_state.analysis_ready and st.session_state.job_matches:
                 st.markdown(f"**Category:** {job['category']}")
                 st.markdown(f"**Job Description:** {job['description']}")
                 if job.get("url"):
-                    st.markdown(f"[Apply]({job['url']})")
+                    st.markdown(f"[Apply Here]({job['url']})")
 
             with score_col:
                 st.markdown(f"### {job['match_score']}%")
@@ -305,7 +324,7 @@ if st.session_state.analysis_ready and st.session_state.job_matches:
         if not st.session_state.analyzed_resume_text.strip():
             st.warning("Please upload or paste resume text before generating a cover letter.")
         elif not selected_job:
-            st.warning("Please select a job for AI feedback.")
+            st.warning("Please select a job before generating a cover letter.")
         else:
             with st.spinner("Generating cover letter..."):
                 st.session_state.ai_cover_letter = generate_cover_letter(
