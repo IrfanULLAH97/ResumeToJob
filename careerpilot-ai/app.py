@@ -6,6 +6,7 @@ from pathlib import Path
 import streamlit as st
 
 from utils.ai_helper import generate_cover_letter, generate_resume_feedback
+from utils.job_api import fetch_remote_jobs
 from utils.job_matcher import extract_skills, match_resume_to_jobs
 from utils.pdf_reader import extract_text_from_pdf
 
@@ -50,6 +51,8 @@ if "ai_resume_feedback" not in st.session_state:
     st.session_state.ai_resume_feedback = ""
 if "ai_cover_letter" not in st.session_state:
     st.session_state.ai_cover_letter = ""
+if "jobs_status_message" not in st.session_state:
+    st.session_state.jobs_status_message = ""
 
 
 with st.sidebar:
@@ -98,6 +101,7 @@ left_column, right_column = st.columns([1.2, 1], gap="large")
 with left_column:
     st.markdown("### Upload or Paste Your Resume")
     uploaded_file = st.file_uploader("Upload a PDF resume", type=["pdf"])
+    use_public_jobs = st.checkbox("Try fetching public jobs online")
 
 with right_column:
     st.markdown("### Analysis Summary")
@@ -140,7 +144,10 @@ st.markdown("## Analysis Results")
 
 if analyze_resume:
     if not resume_text.strip():
-        st.warning("Please upload a resume PDF or paste your resume text to begin the analysis.")
+        if uploaded_file is not None and pdf_error_message:
+            st.warning(pdf_error_message)
+        else:
+            st.warning("Please upload a resume PDF or paste your resume text to begin the analysis.")
         st.session_state.analysis_ready = False
         st.session_state.detected_skills = []
         st.session_state.job_matches = []
@@ -156,15 +163,29 @@ if analyze_resume:
         )
         st.session_state.ai_resume_feedback = ""
         st.session_state.ai_cover_letter = ""
+        st.session_state.jobs_status_message = ""
 
         if detected_skills:
             st.session_state.detected_skills = detected_skills
-            st.session_state.job_matches = match_resume_to_jobs(detected_skills, load_jobs())
+            jobs = load_jobs()
+
+            if use_public_jobs:
+                remote_jobs = fetch_remote_jobs()
+                if remote_jobs:
+                    jobs.extend(remote_jobs)
+                    st.session_state.jobs_status_message = (
+                        f"Loaded {len(remote_jobs)} public remote jobs in addition to local sample jobs."
+                    )
+                else:
+                    st.session_state.jobs_status_message = "Using local sample jobs for demo."
+
+            st.session_state.job_matches = match_resume_to_jobs(detected_skills, jobs)
             st.session_state.analysis_ready = True
         else:
             st.session_state.detected_skills = []
             st.session_state.job_matches = []
             st.session_state.analysis_ready = False
+            st.session_state.jobs_status_message = ""
             st.warning(
                 "No skills were detected. Please paste a more detailed resume with tools, "
                 "technologies, coursework, or project experience."
@@ -187,6 +208,9 @@ with right_column:
 if st.session_state.analysis_ready and st.session_state.job_matches:
     st.markdown("## Job Matches")
     st.markdown("### Top Job Matches")
+
+    if st.session_state.jobs_status_message:
+        st.info(st.session_state.jobs_status_message)
 
     for job in st.session_state.job_matches:
         expander_title = (
