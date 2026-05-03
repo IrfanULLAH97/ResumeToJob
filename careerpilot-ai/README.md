@@ -1,14 +1,34 @@
-# CareerPilot AI
+# CareerPilot AI – Resume-to-Job Match & Application Assistant
 
-CareerPilot AI is a simple Streamlit project for matching resumes to job
-descriptions.
+CareerPilot AI is a Generative AI-powered career assistant that helps users upload a PDF resume, extract skills, match with jobs, identify missing skills, and generate resume feedback and cover letters.
+
+## Problem Statement
+
+Many students and fresh graduates apply randomly without knowing which jobs actually match their skills. Traditional job portals mostly provide keyword search, but they usually do not explain skill gaps or provide personalized application guidance.
+
+## Solution
+
+CareerPilot AI combines resume text extraction, skill matching, job comparison, and Generative AI to help users understand where they fit best. It provides match scores, missing skills, resume improvement suggestions, and tailored cover letters for selected roles.
 
 ## Features
 
-- Upload a PDF resume
-- Paste resume text manually
-- Analyze resumes against sample job descriptions
-- Placeholder support for future AI feedback and cover letter generation
+- PDF resume upload
+- Manual resume paste option
+- Resume text extraction
+- Skill detection
+- Job match scoring
+- Missing skill analysis
+- AI resume feedback
+- AI cover letter generation
+- Downloadable cover letter
+
+## Tech Stack
+
+- Python
+- Streamlit
+- pdfplumber
+- Gemini API
+- JSON job dataset
 
 ## Project Structure
 
@@ -21,32 +41,64 @@ careerpilot-ai/
 ├── .env.example
 ├── utils/
 │   ├── __init__.py
-│   ├── pdf_reader.py
+│   ├── ai_helper.py
+│   ├── job_api.py
 │   ├── job_matcher.py
-│   └── ai_helper.py
+│   └── pdf_reader.py
 └── assets/
     └── screenshots/
 ```
 
-## Setup
+## How to Run Locally
 
-1. Create and activate a virtual environment.
-2. Install dependencies:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Copy `.env.example` to `.env` and add your Gemini API key if you want to use
-   AI features later.
-4. Run the app:
+Run the Streamlit app:
 
 ```bash
 streamlit run app.py
 ```
 
-## Notes
+## Environment Variables
 
-- This version is intentionally beginner-friendly.
-- The current `Analyze Resume` button shows a placeholder message.
-- Utility modules are included so you can expand the project step by step.
+Create a `.env` file in the project root and add:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+This key is used for AI-powered resume feedback and cover letter generation.
+
+## Demo Flow
+
+1. Upload a resume PDF or paste resume text manually.
+2. Click `Analyze Resume`.
+3. View detected skills.
+4. Review matched job roles and match scores.
+5. Select a job for AI feedback.
+6. Generate resume feedback.
+7. Generate a tailored cover letter.
+8. Download the cover letter as a `.txt` file.
+
+## Limitations
+
+- Works best with text-based PDFs.
+- Scanned PDFs may still need improved OCR support for the best results.
+- The MVP primarily relies on a sample-based local job dataset.
+
+## Future Improvements
+
+- Real job API integration
+- OCR for scanned resumes
+- LinkedIn profile analysis
+- Resume PDF improvement generator
+- Interview question generator
+- Dashboard analytics
+
+## Team
+
+- Muhammad Ahsan: https://github.com/mAhsan0553
