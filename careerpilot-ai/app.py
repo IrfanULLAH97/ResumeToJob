@@ -5,6 +5,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from utils.ai_helper import generate_cover_letter, generate_resume_feedback
 from utils.job_matcher import extract_skills, match_resume_to_jobs
 from utils.pdf_reader import extract_text_from_pdf
 
@@ -33,6 +34,22 @@ def render_skill_badges(skills):
         return "None"
 
     return " ".join([f"`{skill}`" for skill in skills])
+
+
+if "analysis_ready" not in st.session_state:
+    st.session_state.analysis_ready = False
+if "detected_skills" not in st.session_state:
+    st.session_state.detected_skills = []
+if "job_matches" not in st.session_state:
+    st.session_state.job_matches = []
+if "analyzed_resume_text" not in st.session_state:
+    st.session_state.analyzed_resume_text = ""
+if "resume_source" not in st.session_state:
+    st.session_state.resume_source = ""
+if "ai_resume_feedback" not in st.session_state:
+    st.session_state.ai_resume_feedback = ""
+if "ai_cover_letter" not in st.session_state:
+    st.session_state.ai_cover_letter = ""
 
 
 with st.sidebar:
@@ -124,59 +141,149 @@ st.markdown("## Analysis Results")
 if analyze_resume:
     if not resume_text.strip():
         st.warning("Please upload a resume PDF or paste your resume text to begin the analysis.")
+        st.session_state.analysis_ready = False
+        st.session_state.detected_skills = []
+        st.session_state.job_matches = []
+        st.session_state.analyzed_resume_text = ""
+        st.session_state.resume_source = ""
+        st.session_state.ai_resume_feedback = ""
+        st.session_state.ai_cover_letter = ""
     else:
         detected_skills = extract_skills(resume_text)
-
-        with right_column:
-            st.markdown("### Detected Skills")
-
-            if detected_skills:
-                st.markdown(render_skill_badges(detected_skills))
-
-                st.markdown("### Resume Summary")
-                st.markdown(f"**Total detected skills:** {len(detected_skills)}")
-                st.markdown(
-                    f"**Resume source:** {'PDF extraction' if extracted_resume_text else 'Manual text input'}"
-                )
-            else:
-                st.warning(
-                    "No skills were detected. Please paste a more detailed resume with tools, "
-                    "technologies, coursework, or project experience."
-                )
+        st.session_state.analyzed_resume_text = resume_text
+        st.session_state.resume_source = (
+            "PDF extraction" if extracted_resume_text else "Manual text input"
+        )
+        st.session_state.ai_resume_feedback = ""
+        st.session_state.ai_cover_letter = ""
 
         if detected_skills:
-            job_matches = match_resume_to_jobs(detected_skills, load_jobs())
+            st.session_state.detected_skills = detected_skills
+            st.session_state.job_matches = match_resume_to_jobs(detected_skills, load_jobs())
+            st.session_state.analysis_ready = True
+        else:
+            st.session_state.detected_skills = []
+            st.session_state.job_matches = []
+            st.session_state.analysis_ready = False
+            st.warning(
+                "No skills were detected. Please paste a more detailed resume with tools, "
+                "technologies, coursework, or project experience."
+            )
 
-            st.markdown("## Job Matches")
-            st.markdown("### Top Job Matches")
+with right_column:
+    st.markdown("### Detected Skills")
+    if st.session_state.detected_skills:
+        st.markdown(render_skill_badges(st.session_state.detected_skills))
+    else:
+        st.caption("Your detected skills and resume summary will appear here after analysis.")
 
-            for job in job_matches:
-                expander_title = (
-                    f"{job['title']} | {job['company']} | {job['match_score']}% Match"
+    st.markdown("### Resume Summary")
+    if st.session_state.analysis_ready:
+        st.markdown(f"**Total detected skills:** {len(st.session_state.detected_skills)}")
+        st.markdown(f"**Resume source:** {st.session_state.resume_source}")
+    else:
+        st.caption("Provide a resume to see skill detection and matching insights.")
+
+if st.session_state.analysis_ready and st.session_state.job_matches:
+    st.markdown("## Job Matches")
+    st.markdown("### Top Job Matches")
+
+    for job in st.session_state.job_matches:
+        expander_title = (
+            f"{job['title']} | {job['company']} | {job['match_score']}% Match"
+        )
+
+        with st.expander(expander_title):
+            info_col, score_col = st.columns([1.3, 1], gap="large")
+
+            with info_col:
+                st.markdown(f"**Company:** {job['company']}")
+                st.markdown(f"**Location:** {job['location']}")
+                st.markdown(f"**Category:** {job['category']}")
+                st.markdown(f"**Job Description:** {job['description']}")
+
+            with score_col:
+                st.markdown(f"### {job['match_score']}%")
+                st.progress(job["match_score"] / 100)
+                st.markdown(f"**{job['match_label']}**")
+
+            st.markdown("**Matched Skills**")
+            st.markdown(render_skill_badges(job["matched_skills"]))
+
+            st.markdown("**Missing Skills**")
+            st.markdown(render_skill_badges(job["missing_skills"]))
+
+    st.markdown("## AI Assistance")
+    job_option_labels = [
+        f"{job['title']} | {job['company']} | {job['match_score']}%"
+        for job in st.session_state.job_matches
+    ]
+    selected_job_label = st.selectbox(
+        "Select a job for AI feedback",
+        options=job_option_labels,
+        index=None,
+        placeholder="Choose a matched job",
+    )
+
+    selected_job = None
+    if selected_job_label:
+        selected_job = next(
+            (
+                job for job in st.session_state.job_matches
+                if f"{job['title']} | {job['company']} | {job['match_score']}%"
+                == selected_job_label
+            ),
+            None,
+        )
+
+    feedback_column, cover_letter_column = st.columns(2, gap="large")
+
+    with feedback_column:
+        generate_feedback = st.button(
+            "Generate Resume Feedback",
+            use_container_width=True,
+        )
+
+    with cover_letter_column:
+        generate_letter = st.button(
+            "Generate Cover Letter",
+            use_container_width=True,
+        )
+
+    if generate_feedback:
+        if not st.session_state.analyzed_resume_text.strip():
+            st.warning("Please upload or paste resume text before requesting AI feedback.")
+        elif not selected_job:
+            st.warning("Please select a job for AI feedback.")
+        else:
+            with st.spinner("Generating AI resume feedback..."):
+                st.session_state.ai_resume_feedback = generate_resume_feedback(
+                    st.session_state.analyzed_resume_text,
+                    selected_job,
                 )
 
-                with st.expander(expander_title):
-                    info_col, score_col = st.columns([1.3, 1], gap="large")
+    if generate_letter:
+        if not st.session_state.analyzed_resume_text.strip():
+            st.warning("Please upload or paste resume text before generating a cover letter.")
+        elif not selected_job:
+            st.warning("Please select a job for AI feedback.")
+        else:
+            with st.spinner("Generating cover letter..."):
+                st.session_state.ai_cover_letter = generate_cover_letter(
+                    st.session_state.analyzed_resume_text,
+                    selected_job,
+                )
 
-                    with info_col:
-                        st.markdown(f"**Company:** {job['company']}")
-                        st.markdown(f"**Location:** {job['location']}")
-                        st.markdown(f"**Category:** {job['category']}")
-                        st.markdown(f"**Job Description:** {job['description']}")
+    if st.session_state.ai_resume_feedback:
+        st.markdown("## AI Resume Feedback")
+        st.write(st.session_state.ai_resume_feedback)
 
-                    with score_col:
-                        st.markdown(f"### {job['match_score']}%")
-                        st.progress(job["match_score"] / 100)
-                        st.markdown(f"**{job['match_label']}**")
-
-                    st.markdown("**Matched Skills**")
-                    st.markdown(render_skill_badges(job["matched_skills"]))
-
-                    st.markdown("**Missing Skills**")
-                    st.markdown(render_skill_badges(job["missing_skills"]))
-else:
-    with right_column:
-        st.markdown("### Detected Skills")
-        st.caption("Your detected skills and resume summary will appear here after analysis.")
-        st.markdown("### Resume Summary")
-        st.caption("Provide a resume to see skill detection and matching insights.")
+    if st.session_state.ai_cover_letter:
+        st.markdown("## Generated Cover Letter")
+        st.write(st.session_state.ai_cover_letter)
+        st.download_button(
+            "Download Cover Letter",
+            data=st.session_state.ai_cover_letter,
+            file_name="careerpilot_cover_letter.txt",
+            mime="text/plain",
+        )
